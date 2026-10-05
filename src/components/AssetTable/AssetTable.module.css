@@ -60,6 +60,10 @@
   background: var(--color-row-hover);
 }
 
+.rowSelected {
+  background: var(--color-row-selected);
+}
+
 tbody tr:last-child .td {
   border-bottom: none;
 }

@@ -54,6 +54,23 @@ Open the local URL printed by Vite. All data is local; no backend or environment
 - **Backend and auth.** All state is local, per the brief.
 - **Dev-time vocabulary check** that every zone in the list appears in the data.
 
+## Performance
+
+Profiled with React DevTools at 1,000 generated rows (`?rows=1000`, dev mode only).
+
+| Scenario                        | Before   | After         |
+| ------------------------------- | -------- | ------------- |
+| First search keystroke          | 432 ms   | 62 ms         |
+| AssetTable render (same commit) | 367 ms   | 46 ms         |
+| Single row update (tick/status) | all rows | ~15 ms, 1 row |
+
+**Problem:** every keystroke re-rendered all 1,000 rows, including ones that hadn't changed.
+
+**Fix:**
+
+- Extracted a memoised `AssetRow` so unchanged rows skip rendering.
+- Passed selection as a boolean (`selected`) instead of the whole Set, so only the
+
 ## What I'd Do Next
 
 - A real map (e.g. Leaflet) with asset markers and zone boundaries
@@ -72,3 +89,4 @@ I used the provided assistant (GLM 5.3 Flash in OpenCode) as a pair programmer, 
 - **I fixed some UI issues myself.** I replaced a row hover colour that clashed with the "Healthy" status, and fixed dropdown options inheriting the pill colour.
 - **I verified everything.** Type-check and build after each step, [Vitest tests for the reducer and selectors,] and a manual browser pass of every required flow.
 - **Setup note.** The Windows install script failed (a `\bin` path was turned into a hidden backspace character), so I installed via the macOS script in Git Bash and reported the issue.
+- **Assistant.** Added an AGENTS.md with working rules (plan first, pure state, UI standards) to keep the assistant consistent across steps

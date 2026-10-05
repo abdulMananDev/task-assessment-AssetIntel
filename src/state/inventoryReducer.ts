@@ -1,4 +1,4 @@
-import { ASSETS, SEED_LOGS } from "../data/assets";
+import { SEED_LOGS } from "../data/assets";
 import type {
   AssignmentResult,
   Filters,
@@ -10,10 +10,10 @@ import type {
 } from "../types";
 import { addToWeek, partitionAssignment } from "./assignments";
 import { DEFAULT_DIRECTIONS, DEFAULT_FILTERS, DEFAULT_SORT } from "./defaults";
-
+import { INITIAL_ASSETS } from "../data/initialAssets";
 export function createInitialState(): InventoryState {
   return {
-    assets: ASSETS,
+    assets: [...INITIAL_ASSETS],
     logs: SEED_LOGS,
     filters: DEFAULT_FILTERS,
     sort: DEFAULT_SORT,
@@ -97,7 +97,9 @@ export function inventoryReducer(
       return { ...state, openAssetId: null };
 
     case "SET_HEALTH_STATUS": {
-      const asset = state.assets.find((candidate) => candidate.id === action.assetId);
+      const asset = state.assets.find(
+        (candidate) => candidate.id === action.assetId,
+      );
       if (asset === undefined || asset.healthStatus === action.healthStatus) {
         return state;
       }
@@ -119,7 +121,9 @@ export function inventoryReducer(
       );
       if (assignable.length === 0 && skippedAssetIds.length === 0) return state;
 
-      const logByAssetId = new Map(action.logs.map((log) => [log.assetId, log]));
+      const logByAssetId = new Map(
+        action.logs.map((log) => [log.assetId, log]),
+      );
       const newLogs = assignable
         .map((assetId) => logByAssetId.get(assetId))
         .filter((log): log is MaintenanceLog => log !== undefined);
@@ -158,7 +162,9 @@ export function inventoryReducer(
       const assetIds = entry.assetIds.filter((id) => id !== action.assetId);
       const taskQueue =
         assetIds.length === 0
-          ? state.taskQueue.filter((candidate) => candidate.id !== action.taskId)
+          ? state.taskQueue.filter(
+              (candidate) => candidate.id !== action.taskId,
+            )
           : state.taskQueue.map((candidate) =>
               candidate.id === action.taskId
                 ? { ...candidate, assetIds }

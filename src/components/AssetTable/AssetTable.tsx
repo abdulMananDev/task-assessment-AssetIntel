@@ -1,4 +1,6 @@
 import {
+  memo,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -40,7 +42,11 @@ function SortHeaderCell({ sortKey, sort, dispatch }: SortHeaderCellProps) {
       scope="col"
       className={styles.th}
       aria-sort={
-        active ? (sort.direction === "asc" ? "ascending" : "descending") : undefined
+        active
+          ? sort.direction === "asc"
+            ? "ascending"
+            : "descending"
+          : undefined
       }
     >
       <button
@@ -57,6 +63,76 @@ function SortHeaderCell({ sortKey, sort, dispatch }: SortHeaderCellProps) {
   );
 }
 
+interface AssetRowProps {
+  asset: Asset;
+  selected: boolean;
+  onToggle: (assetId: string) => void;
+  onOpen: (assetId: string) => void;
+  onStatusChange: (assetId: string, next: HealthStatus) => void;
+}
+
+/**
+ * Memoised row: every prop is referentially stable across keystrokes
+ * (asset ref, boolean, stable callbacks), so only rows whose selection
+ * actually changed re-render. Table-private on purpose — it shares this
+ * module's td/checkbox/name styles.
+ */
+const AssetRow = memo(function AssetRow({
+  asset,
+  selected,
+  onToggle,
+  onOpen,
+  onStatusChange,
+}: AssetRowProps) {
+  const handleRowClick = (event: MouseEvent<HTMLTableRowElement>) => {
+    const target = event.target as HTMLElement;
+    if (target.closest("button, input, select, label, a")) return;
+    onOpen(asset.id);
+  };
+
+  return (
+    <tr
+      className={cx(styles.row, selected && styles.rowSelected)}
+      aria-selected={selected}
+      onClick={handleRowClick}
+    >
+      <td className={styles.td}>
+        <input
+          type="checkbox"
+          className={styles.checkbox}
+          checked={selected}
+          onChange={() => onToggle(asset.id)}
+          aria-label={`Select ${asset.name} for scheduling`}
+        />
+      </td>
+      <td className={cx(styles.td, styles.idCell)}>{asset.id}</td>
+      <td className={styles.td}>
+        {/* Focus-return target when the drawer closes (see DetailDrawer). */}
+        <button
+          type="button"
+          id={`open-asset-${asset.id}`}
+          className={styles.nameButton}
+          onClick={() => onOpen(asset.id)}
+        >
+          {asset.name}
+        </button>
+      </td>
+      <td className={cx(styles.td, styles.muted)}>{asset.type}</td>
+      <td className={cx(styles.td, styles.muted)}>{asset.zone}</td>
+      <td className={styles.td}>
+        <StatusControl
+          assetId={asset.id}
+          value={asset.healthStatus}
+          onStatusChange={onStatusChange}
+        />
+      </td>
+      <td className={cx(styles.td, styles.muted)}>
+        {formatDate(asset.lastInspected)}
+      </td>
+    </tr>
+  );
+});
+
 interface AssetTableProps {
   assets: Asset[];
   sort: SortState;
@@ -72,7 +148,10 @@ export function AssetTable({
   dispatch,
   onStatusChange,
 }: AssetTableProps) {
-  const selectedSet = useMemo(() => new Set(selectedAssetIds), [selectedAssetIds]);
+  const selectedSet = useMemo(
+    () => new Set(selectedAssetIds),
+    [selectedAssetIds],
+  );
   const allVisibleSelected =
     assets.length > 0 && assets.every((asset) => selectedSet.has(asset.id));
   const someVisibleSelected = assets.some((asset) => selectedSet.has(asset.id));
@@ -84,6 +163,20 @@ export function AssetTable({
         someVisibleSelected && !allVisibleSelected;
     }
   }, [someVisibleSelected, allVisibleSelected]);
+
+  const handleToggle = useCallback(
+    (assetId: string) => {
+      dispatch({ type: "TOGGLE_ASSET_SELECTION", assetId });
+    },
+    [dispatch],
+  );
+
+  const handleOpen = useCallback(
+    (assetId: string) => {
+      dispatch({ type: "OPEN_ASSET", assetId });
+    },
+    [dispatch],
+  );
 
   if (assets.length === 0) {
     return (
@@ -102,12 +195,6 @@ export function AssetTable({
       />
     );
   }
-
-  const handleRowClick = (event: MouseEvent<HTMLTableRowElement>, assetId: string) => {
-    const target = event.target as HTMLElement;
-    if (target.closest("button, input, select, label, a")) return;
-    dispatch({ type: "OPEN_ASSET", assetId });
-  };
 
   return (
     <div className={styles.scroll}>
@@ -133,53 +220,28 @@ export function AssetTable({
             <SortHeaderCell sortKey="name" sort={sort} dispatch={dispatch} />
             <SortHeaderCell sortKey="type" sort={sort} dispatch={dispatch} />
             <SortHeaderCell sortKey="zone" sort={sort} dispatch={dispatch} />
-            <SortHeaderCell sortKey="healthStatus" sort={sort} dispatch={dispatch} />
-            <SortHeaderCell sortKey="lastInspected" sort={sort} dispatch={dispatch} />
+            <SortHeaderCell
+              sortKey="healthStatus"
+              sort={sort}
+              dispatch={dispatch}
+            />
+            <SortHeaderCell
+              sortKey="lastInspected"
+              sort={sort}
+              dispatch={dispatch}
+            />
           </tr>
         </thead>
         <tbody>
           {assets.map((asset) => (
-            <tr
+            <AssetRow
               key={asset.id}
-              className={styles.row}
-              onClick={(event) => handleRowClick(event, asset.id)}
-            >
-              <td className={styles.td}>
-                <input
-                  type="checkbox"
-                  className={styles.checkbox}
-                  checked={selectedSet.has(asset.id)}
-                  onChange={() =>
-                    dispatch({ type: "TOGGLE_ASSET_SELECTION", assetId: asset.id })
-                  }
-                  aria-label={`Select ${asset.name} for scheduling`}
-                />
-              </td>
-              <td className={cx(styles.td, styles.idCell)}>{asset.id}</td>
-              <td className={styles.td}>
-                {/* Focus-return target when the drawer closes (see DetailDrawer). */}
-                <button
-                  type="button"
-                  id={`open-asset-${asset.id}`}
-                  className={styles.nameButton}
-                  onClick={() => dispatch({ type: "OPEN_ASSET", assetId: asset.id })}
-                >
-                  {asset.name}
-                </button>
-              </td>
-              <td className={cx(styles.td, styles.muted)}>{asset.type}</td>
-              <td className={cx(styles.td, styles.muted)}>{asset.zone}</td>
-              <td className={styles.td}>
-                <StatusControl
-                  assetId={asset.id}
-                  value={asset.healthStatus}
-                  onStatusChange={onStatusChange}
-                />
-              </td>
-              <td className={cx(styles.td, styles.muted)}>
-                {formatDate(asset.lastInspected)}
-              </td>
-            </tr>
+              asset={asset}
+              selected={selectedSet.has(asset.id)}
+              onToggle={handleToggle}
+              onOpen={handleOpen}
+              onStatusChange={onStatusChange}
+            />
           ))}
         </tbody>
       </table>
