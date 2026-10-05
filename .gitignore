@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+
+# OS / editor noise
+.DS_Store
+*.local
+
+problem_statement.md
+submit.sh

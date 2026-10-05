@@ -1,0 +1,67 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+}
+
+.wrapper.healthy {
+  background: var(--color-healthy-soft);
+  color: var(--color-healthy);
+}
+
+.wrapper.attention {
+  background: var(--color-attention-soft);
+  color: var(--color-attention);
+}
+
+.wrapper.critical {
+  background: var(--color-critical-soft);
+  color: var(--color-critical);
+}
+
+.dot {
+  position: absolute;
+  left: 10px;
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  pointer-events: none;
+}
+
+.chevron {
+  position: absolute;
+  right: 11px;
+  inline-size: 7px;
+  block-size: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  margin-top: -3px;
+  pointer-events: none;
+}
+
+.select {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: var(--leading-normal);
+  padding: var(--space-1) var(--space-5);
+  border-radius: inherit;
+  cursor: pointer;
+  max-width: 11rem;
+  text-overflow: ellipsis;
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.select option {
+  color: var(--color-text);
+}

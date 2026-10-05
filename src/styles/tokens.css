@@ -1,0 +1,124 @@
+/**
+ * Design tokens — the single source of truth for the visual language.
+ * Components consume these variables only; no raw values in component CSS.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Typography */
+  --font-sans:
+    "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", "Cascadia Code", "Source Code Pro", Menlo,
+    Consolas, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+
+  /* Spacing scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* Border */
+  --border-width: 1px;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.08);
+  --shadow-md: 0 4px 12px rgb(15 23 42 / 0.1);
+  --shadow-lg: 0 16px 40px rgb(15 23 42 / 0.18);
+
+  /* Z-index layers */
+  --z-backdrop: 30;
+  --z-drawer: 40;
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Layout */
+  --container-max: 1200px;
+
+  /* ---------- Light theme (default) ---------- */
+  --color-bg: #f4f6f1;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-border: #e1e5da;
+  --color-border-strong: #c6cdbd;
+
+  --color-text: #1d2519;
+  --color-text-muted: #5b664f;
+  --color-text-faint: #899178;
+
+  --color-primary: #2e6e4e;
+  --color-primary-strong: #255a3f;
+  --color-primary-soft: #e2efe6;
+  --color-on-primary: #ffffff;
+
+  --color-focus: #2e6e4e;
+  --color-row-hover: #f0f2ec;
+  --color-row-selected: #e6ecf3;
+
+  /* Semantic health colors (foreground pairings sit on their soft bg) */
+  --color-healthy: #27703e;
+  --color-healthy-soft: #e0f1e3;
+  --color-attention: #8f620d;
+  --color-attention-soft: #fbeed3;
+  --color-critical: #b93b30;
+  --color-critical-soft: #fbe3e0;
+}
+
+/* ---------- Dark theme ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #11150e;
+    --color-surface: #191f15;
+    --color-surface-raised: #20281c;
+    --color-border: #303a2b;
+    --color-border-strong: #46543e;
+
+    --color-text: #ecf1e5;
+    --color-text-muted: #a8b29a;
+    --color-text-faint: #7d876f;
+
+    --color-primary: #6fbf8f;
+    --color-primary-strong: #8bd2a5;
+    --color-primary-soft: #213426;
+    --color-on-primary: #0c120c;
+
+    --color-focus: #6fbf8f;
+    --color-row-hover: #20271c;
+    --color-row-selected: #1c2632;
+
+    --color-healthy: #7dd08e;
+    --color-healthy-soft: #1d3024;
+    --color-attention: #e6b45c;
+    --color-attention-soft: #382d14;
+    --color-critical: #ef8377;
+    --color-critical-soft: #3e211d;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4), 0 1px 3px rgb(0 0 0 / 0.45);
+    --shadow-md: 0 4px 12px rgb(0 0 0 / 0.45);
+    --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.55);
+  }
+}
