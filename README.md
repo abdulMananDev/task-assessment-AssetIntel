@@ -41,18 +41,9 @@ Open the local URL printed by Vite. All data is local; no backend or environment
 
 **Scheduling rules.** An asset can be scheduled in multiple weeks (e.g. an inspection, then a follow-up); only same-week duplicates are skipped and reported ("2 assigned, 1 already scheduled"). Assigned assets leave the selection after a batch. Assignments and removals are both written to the maintenance log for a full audit trail.
 
-**Selections hidden by filters.** [Selected assets stay selected when filtered out, and the selection bar shows "N hidden by filters", so batch assign is never a surprise.]
-
 **Colour has one meaning.** Green is reserved for health status; row hover and selection use neutral tokens.
 
 **Maintenance logs are mocked.** The dataset has no logs, so seed entries are keyed by asset ID. In production these would load from an API when the drawer opens.
-
-## What I Skipped
-
-- **Map simulation.** The overview mentions map controls but the requirements don't, so I prioritised the required features. [A lightweight zone overview was / was not added.]
-- **"Clear this week" action.** Only per-asset removal is implemented; a bulk clear wasn't required.
-- **Backend and auth.** All state is local, per the brief.
-- **Dev-time vocabulary check** that every zone in the list appears in the data.
 
 ## Performance
 
@@ -69,7 +60,19 @@ Profiled with React DevTools at 1,000 generated rows (`?rows=1000`, dev mode onl
 **Fix:**
 
 - Extracted a memoised `AssetRow` so unchanged rows skip rendering.
-- Passed selection as a boolean (`selected`) instead of the whole Set, so only the
+- Passed selection as a boolean (`selected`) instead of the whole Set, so only the toggled row's props change.
+- Kept callbacks stable with `useCallback`, so `memo` isn't defeated by new function references.
+
+**Result:** about 7× faster on the first keystroke, well under the ~100 ms threshold for noticeable lag. Toolbar still re-renders on selection changes (~3 ms), which isn't worth memoising.
+
+> Numbers are from dev mode, which is slower than production.
+
+## What I Skipped
+
+- **Map simulation.** The overview mentions map controls but the requirements don't, so I prioritised the required features. A real map is listed under What I'd Do Next.
+- **"Clear this week" action.** Only per-asset removal is implemented; a bulk clear wasn't required.
+- **Backend and auth.** All state is local, per the brief.
+- **Dev-time vocabulary check** that every zone in the list appears in the data.
 
 ## What I'd Do Next
 
@@ -78,6 +81,7 @@ Profiled with React DevTools at 1,000 generated rows (`?rows=1000`, dev mode onl
 - "Clear this week" and drag-and-drop between weeks
 - Virtualised table for thousands of assets
 - End-to-end tests (Playwright) for the main dispatcher flows
+- A dedicated design pass: refined motion (drawer, notices, list transitions), richer empty states, and a fuller design system with documented component variants.
 
 ## Working with the AI Assistant
 
@@ -86,7 +90,9 @@ I used the provided assistant (GLM 5.3 Flash in OpenCode) as a pair programmer, 
 - **Plan first, then build.** I approved an architecture plan in Plan mode, then built step by step in Build mode, reviewing and committing after each step.
 - **I set the constraints.** TypeScript instead of the proposed JS, derived rows instead of stored state, fixed vocabulary, deltas-only persistence and scheduling rules were my decisions.
 - **I reviewed the output and corrected it.** For example, I caught that the reducer generated IDs and dates internally (impure), asked for per-asset removal when the queue only supported removing whole weeks, and requested natural ID sorting.
-- **I fixed some UI issues myself.** I replaced a row hover colour that clashed with the "Healthy" status, and fixed dropdown options inheriting the pill colour.
-- **I verified everything.** Type-check and build after each step, [Vitest tests for the reducer and selectors,] and a manual browser pass of every required flow.
+- **I profiled and directed a performance fix.** At 1,000 rows every keystroke re-rendered the whole table (432 ms). I specified a memoised row with boolean selection and stable callbacks, then re-profiled to confirm 62 ms.
+- **I caught gaps through testing.** The selection bar silently assigned assets hidden by filters, so I had a hidden count added. A keyboard check also confirmed checkboxes toggle with Space.
+- **Working rules.** Added an AGENTS.md (plan first, pure state, UI standards) to keep the assistant consistent across steps.
+- **I verified everything.** Type-check and build after each step, 25 Vitest tests for the reducer and selectors and a manual browser pass of every required flow.
 - **Setup note.** The Windows install script failed (a `\bin` path was turned into a hidden backspace character), so I installed via the macOS script in Git Bash and reported the issue.
 - **Assistant.** Added an AGENTS.md with working rules (plan first, pure state, UI standards) to keep the assistant consistent across steps
